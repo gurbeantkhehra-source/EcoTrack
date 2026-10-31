@@ -3,12 +3,13 @@ from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel
 from .classifier import classify_image
-from .scoring import calculate_points
+from .scoring import calculate_points, POINTS_PER_KG
 from .db import get_conn
 
 router = APIRouter()
 
 READY_LIMIT = 100
+MIN_CONFIDENCE = 0.6
 UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"
 
 
@@ -29,18 +30,101 @@ def health():
     return {"status": "ok"}
 
 
-@router.post("/users")
-def create_user(user: UserIn):
-    if user.role not in ("collector", "pickup", "recycler"):
-        raise HTTPException(status_code=400, detail="Role must be collector, pickup or recycler")
+@router.post("/scan")
+async def scan(
+    file: UploadFile = File(...),
+    owner_id: int = Form(...),
+    category: str | None = Form(None),
+    quantity: int = Form(1),
+):
+    category = (category or "").strip().lower() or None
+    if quantity < 1 or quantity > 1000:
+        raise HTTPException(status_code=400, detail="Quantity must be between 1 and 1000")
+    if category is not None and category not in POINTS_PER_KG:
+        raise HTTPException(status_code=400, detail="Unknown category")
+
+    image_bytes = await file.read()
     conn = get_conn()
     try:
-        cur = conn.execute(
-            "INSERT INTO users (name, role, verified) VALUES (?, ?, 0)",
-            (user.name, user.role),
+        owner = conn.execute("SELECT * FROM users WHERE id = ?", (owner_id,)).fetchone()
+        if owner is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        if owner["role"] != "collector":
+            raise HTTPException(status_code=403, detail="Only collectors can scan")
+
+        if category:
+            result = {"category": category, "confidence": 1.0}
+            source = "user"
+        else:
+            try:
+                result = classify_image(image_bytes)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="File is not a valid image")
+            source = "model"
+            if result["confidence"] < MIN_CONFIDENCE:
+                return {
+                    "owner_id": owner_id,
+                    "needs_category": True,
+                    "suggested_category": result["category"],
+                    "confidence": result["confidence"],
+                    "message": "Not sure what this is. Please choose the category.",
+                }
+
+        points = calculate_points(result["category"]) * quantity
+
+        if result["category"] == "other":
+            return {
+                "owner_id": owner_id,
+                "category": "other",
+                "confidence": result["confidence"],
+                "source": source,
+                "points": 0,
+                "batch_id": None,
+                "batch_status": None,
+                "batch_total_points": None,
+                "message": "Not recyclable waste, so it was not added to a batch",
+            }
+
+        suffix = Path(file.filename or "").suffix or ".jpg"
+        photo_name = uuid.uuid4().hex + suffix
+        UPLOAD_DIR.mkdir(exist_ok=True)
+        (UPLOAD_DIR / photo_name).write_bytes(image_bytes)
+
+        batch = conn.execute(
+            "SELECT * FROM batches WHERE owner_id = ? AND status = 'collecting'",
+            (owner_id,),
+        ).fetchone()
+        if batch is None:
+            cur = conn.execute("INSERT INTO batches (owner_id) VALUES (?)", (owner_id,))
+            batch_id = cur.lastrowid
+            total = 0
+        else:
+            batch_id = batch["id"]
+            total = batch["total_points"]
+
+        conn.execute(
+            "INSERT INTO items (owner_id, category, confidence, points, photo_path, batch_id) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (owner_id, result["category"], result["confidence"], points, photo_name, batch_id),
+        )
+        total += points
+        status = "ready" if total >= READY_LIMIT else "collecting"
+        conn.execute(
+            "UPDATE batches SET total_points = ?, status = ? WHERE id = ?",
+            (total, status, batch_id),
         )
         conn.commit()
-        return {"id": cur.lastrowid, "name": user.name, "role": user.role, "verified": False}
+
+        return {
+            "owner_id": owner_id,
+            "category": result["category"],
+            "confidence": result["confidence"],
+            "source": source,
+            "points": points,
+            "batch_id": batch_id,
+            "batch_status": status,
+            "batch_total_points": total,
+        }
     finally:
         conn.close()
 
@@ -171,13 +255,18 @@ def picked_up(batch_id: int):
 
 
 @router.get("/recyclers")
-def recyclers():
+def recyclers(include_unverified: bool = False):
     conn = get_conn()
     try:
-        rows = conn.execute(
-            "SELECT id, name, verified FROM users WHERE role = 'recycler' AND verified = 1"
-        ).fetchall()
-        return [{"id": r["id"], "name": r["name"], "verified": True} for r in rows]
+        if include_unverified:
+            rows = conn.execute(
+                "SELECT id, name, verified FROM users WHERE role = 'recycler'"
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT id, name, verified FROM users WHERE role = 'recycler' AND verified = 1"
+            ).fetchall()
+        return [{"id": r["id"], "name": r["name"], "verified": bool(r["verified"])} for r in rows]
     finally:
         conn.close()
 
