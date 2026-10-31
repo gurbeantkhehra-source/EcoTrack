@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Sign Up | EcoTrack</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="auth-container">
+        <h1>🌱 ecotrack</h1>
+        <h2>Create Account</h2>
+        <p>Join ecotrack and make a cleaner future.</p>
+
+        <form id="signupForm">
+            <input type="text" id="name" placeholder="Full Name" required>
+            <input type="email" id="signupEmail" placeholder="Email Address" required>
+            <input type="password" id="signupPassword"
+                   placeholder="Create Password" minlength="6" required>
+
+            <button type="submit">Sign Up</button>
+        </form>
+
+        <p id="signupMessage"></p>
+
+        <p>Already have an account?
+            <a href="login.html">Login</a>
+        </p>
+
+        <a href="index.html">Back to Home</a>
+    </div>
+
+    <script src="auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>ecotrack | Dashboard</title>
+
+<link rel="stylesheet" href="./style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+
+</head>
+
+<body>
+
+
+<!-- NAVBAR -->
+<header class="navbar">
+
+    <div class="logo">
+        ♻ ecotrack
+    </div>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="detection.html">AI Detection</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="categories.html">Categories</a></li>
+            <li><a href="about.html">About Us</a></li>
+        </ul>
+    </nav>
+
+    <a href="detection.html" class="nav-button">
+        Get Started →
+    </a>
+
+</header>
+
+
+<!-- DASHBOARD HERO -->
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="hero-tag">
+            🏆 YOUR ECO JOURNEY
+        </div>
+
+        <h1>
+            Track Your
+            <span>Green Impact.</span>
+        </h1>
+
+        <p>
+            Monitor your waste segregation activities,
+            track your Eco Points and see your contribution
+            towards a cleaner environment.
+        </p>
+
+        <div class="hero-buttons">
+
+            <a href="detection.html" class="primary-btn">
+                Start Detection →
+            </a>
+
+            <a href="categories.html" class="secondary-btn">
+                Explore Categories
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="hero-visual">
+
+        <div class="visual-card">
+
+            <div class="visual-icon">🏆</div>
+
+            <h2>Your Eco Rewards</h2>
+
+            <p>Small Steps. Big Impact.</p>
+
+            <div class="sorting-item">
+                <span>♻️</span>
+                Waste Segregation
+                <strong>01</strong>
+            </div>
+
+            <div class="sorting-item">
+                <span>🌱</span>
+                Green Lifestyle
+                <strong>02</strong>
+            </div>
+
+            <div class="sorting-item">
+                <span>🏆</span>
+                Eco Rewards
+                <strong>03</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- DASHBOARD STATISTICS -->
+<section class="dashboard">
+
+    <div class="section-heading">
+
+        <span class="section-label">
+            YOUR ACTIVITY
+        </span>
+
+        <h2>Waste Statistics & Eco Rewards</h2>
+
+        <p>
+            Keep track of your waste segregation progress.
+        </p>
+
+    </div>
+
+
+    <div class="stats-grid">
+
+        <!-- TOTAL WASTE -->
+        <div class="stat-card">
+
+            <div class="stat-icon">♻️</div>
+
+            <h3 id="totalWaste">0</h3>
+
+            <p>Total Waste Items</p>
+
+        </div>
+
+
+        <!-- PLASTIC -->
+        <div class="stat-card">
+
+            <div class="stat-icon">🧴</div>
+
+            <h3 id="plasticCount">0</h3>
+
+            <p>Plastic Waste</p>
+
+        </div>
+
+
+        <!-- PAPER -->
+        <div class="stat-card">
+
+            <div class="stat-icon">📄</div>
+
+            <h3 id="paperCount">0</h3>
+
+            <p>Paper Waste</p>
+
+        </div>
+
+
+        <!-- METAL -->
+        <div class="stat-card">
+
+            <div class="stat-icon">🥫</div>
+
+            <h3 id="metalCount">0</h3>
+
+            <p>Metal Waste</p>
+
+        </div>
+
+
+        <!-- GLASS -->
+        <div class="stat-card">
+
+            <div class="stat-icon">🍾</div>
+
+            <h3 id="glassCount">0</h3>
+
+            <p>Glass Waste</p>
+
+        </div>
+
+
+        <!-- ORGANIC -->
+        <div class="stat-card">
+
+            <div class="stat-icon">🍃</div>
+
+            <h3 id="organicCount">0</h3>
+
+            <p>Organic Waste</p>
+
+        </div>
+
+
+        <!-- E-WASTE -->
+        <div class="stat-card">
+
+            <div class="stat-icon">🔋</div>
+
+            <h3 id="eWasteCount">0</h3>
+
+            <p>E-Waste</p>
+
+        </div>
+
+
+        <!-- ECO POINTS -->
+        <div class="stat-card reward-card">
+
+            <div class="stat-icon">🏆</div>
+
+            <h3 id="ecoPoints">0</h3>
+
+            <p>Total Eco Points</p>
+
+            <small>
+                Keep recycling, keep earning!
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- WASTE HISTORY -->
+    <div class="history-box">
+
+        <div class="history-header">
+
+            <h3>Recent Waste History</h3>
+
+            <button
+                type="button"
+                onclick="clearHistory()"
+                class="clear-btn"
+            >
+                Clear History
+            </button>
+
+        </div>
+
+        <div id="historyList">
+
+            <p class="empty-history">
+                No detection history yet.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ECO MESSAGE -->
+<section class="hub-section">
+
+    <div class="hub-content">
+
+        <span class="section-label">
+            KEEP GOING GREEN
+        </span>
+
+        <h2>Every Small Action Makes A Difference!</h2>
+
+        <p>
+            Your contribution towards waste segregation
+            helps build a cleaner and greener future.
+        </p>
+
+        <a href="detection.html" class="hub-button">
+            Recycle More →
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+
+    <div class="footer-logo">
+        ♻ ecotrack
+    </div>
+
+    <p>
+        Smart Detection. Smarter Segregation.
+    </p>
+
+    <p class="copyright">
+        © 2026 ecotrack. All Rights Reserved.
+    </p>
+
+</footer>
+
+
+<!-- JAVASCRIPT -->
+<script src="./auth.js"></script>
+<script src="./script.js"></script>
+
+
+</body>
+
+</html>
