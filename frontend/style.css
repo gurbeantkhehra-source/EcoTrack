@@ -1795,3 +1795,97 @@ footer p {
     color: var(--primary-dark);
     border: 1px solid var(--primary);
 }
+
+
+/* =========================================
+   PICKUP & DELIVERY BOARD
+========================================= */
+
+.board {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.board-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.board-controls input {
+    flex: 1 1 220px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+}
+
+.board-message {
+    min-height: 1.4em;
+    margin: 8px 0 14px;
+    font-weight: 600;
+}
+
+.batch-card {
+    margin-bottom: 14px;
+    padding: 18px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    text-align: left;
+}
+
+.batch-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.batch-note {
+    margin: 6px 0;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.status-pill {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--light-green);
+    color: var(--dark-green);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-collecting { background: #E2E8F0; color: #334155; }
+.status-ready { background: #FEF3C7; color: #92400E; }
+.status-completed { background: var(--primary); color: var(--white); }
+
+.board-select {
+    margin: 6px 8px 6px 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+}
+
+
+.panel-link {
+    padding: 8px 14px;
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    color: var(--primary-dark);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.panel-link:hover {
+    background: var(--primary);
+    color: var(--white);
+}

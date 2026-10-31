@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>ecotrack | Pickup &amp; Delivery</title>
+
+<link rel="stylesheet" href="./style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+
+</head>
+
+<body>
+
+
+<!-- NAVBAR -->
+<header class="navbar">
+
+    <div class="logo">
+        ♻ ecotrack
+    </div>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="detection.html">AI Detection</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="batches.html">Pickup &amp; Delivery</a></li>
+            <li><a href="categories.html">Categories</a></li>
+            <li><a href="about.html">About Us</a></li>
+        </ul>
+    </nav>
+
+    <a href="detection.html" class="nav-button">
+        Get Started →
+    </a>
+
+</header>
+
+
+<!-- PAGE HERO -->
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="hero-tag">
+            🚚 PICKUP &amp; RECYCLING
+        </div>
+
+        <h1>
+            Collect. Deliver.
+            <span>Recycle.</span>
+        </h1>
+
+        <p>
+            A batch is ready at 100 Recovery Points. A pickup person
+            collects it and delivers it to a recycler. E-waste can only
+            go to a verified recycler.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- BOARD -->
+<section class="detection-section">
+
+    <div class="section-heading">
+
+        <span class="section-label">
+            DEMO BOARD
+        </span>
+
+        <h2>Pickup &amp; Delivery Board</h2>
+
+        <p>
+            Demo roles: collector Asha (#1) and pickup person Ravi (#4).
+            The recyclers come from the server.
+        </p>
+
+    </div>
+
+    <div class="board">
+
+        <div class="board-controls">
+
+            <label for="serverAddress">Server address</label>
+
+            <input type="text" id="serverAddress" placeholder="http://192.168.1.5:8000">
+
+            <button type="button" id="saveServer" class="upload-button">Save</button>
+
+            <button type="button" id="resetServer" class="upload-button">Use default</button>
+
+            <button type="button" id="refreshBoard" class="detect-button">Refresh</button>
+
+        </div>
+
+        <p id="boardMessage" class="board-message"></p>
+
+        <div id="boardList"></div>
+
+    </div>
+
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+
+    <div class="footer-logo">
+        ♻ ecotrack
+    </div>
+
+    <p>
+        Smart Detection. Smarter Segregation.
+    </p>
+
+    <p class="copyright">
+        © 2026 ecotrack. All Rights Reserved.
+    </p>
+
+</footer>
+
+
+<!-- JAVASCRIPT -->
+<script src="./auth.js"></script>
+<script src="./script.js"></script>
+<script src="./flow.js"></script>
+</body>
+
+</html>

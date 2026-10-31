@@ -14,7 +14,7 @@ const wasteCategories = [
         name: "Plastic",
         icon: "🥤",
         bin: "Blue Bin",
-        points: 10,
+        points: 1,
         color: "#2196F3",
         instructions: "Clean plastic items before recycling.",
         examples: "Plastic bottles, containers, packaging"
@@ -24,7 +24,7 @@ const wasteCategories = [
         name: "Paper",
         icon: "📄",
         bin: "Blue Bin",
-        points: 5,
+        points: 1,
         color: "#2196F3",
         instructions: "Keep paper dry and separate from food waste.",
         examples: "Newspapers, cardboard, notebooks"
@@ -34,7 +34,7 @@ const wasteCategories = [
         name: "Metal",
         icon: "🥫",
         bin: "Blue Bin",
-        points: 15,
+        points: 10,
         color: "#607D8B",
         instructions: "Clean metal containers before recycling.",
         examples: "Aluminium cans, metal containers"
@@ -44,7 +44,7 @@ const wasteCategories = [
         name: "Glass",
         icon: "🍾",
         bin: "Glass Bin",
-        points: 10,
+        points: 1,
         color: "#4CAF50",
         instructions: "Handle glass carefully and recycle separately.",
         examples: "Glass bottles, jars"
@@ -54,7 +54,7 @@ const wasteCategories = [
         name: "Organic",
         icon: "🍎",
         bin: "Green Bin",
-        points: 5,
+        points: 0,
         color: "#4CAF50",
         instructions: "Put organic waste in composting bins.",
         examples: "Fruit peels, vegetable waste, food scraps"
@@ -64,7 +64,7 @@ const wasteCategories = [
         name: "E-Waste",
         icon: "🔋",
         bin: "E-Waste Collection Center",
-        points: 25,
+        points: 15,
         color: "#9C27B0",
         instructions: "Submit electronic waste to an authorized collection center.",
         examples: "Batteries, chargers, cables, electronic devices"
@@ -309,6 +309,7 @@ function initializeUpload() {
 
 // Every scan is saved in the backend as this demo collector (user id 1).
 const ECOTRACK_OWNER_ID = 1;
+// Must be the same number as READY_LIMIT in backend/app/routes.py.
 const ECOTRACK_READY_POINTS = 100;
 
 // Backend category -> card in wasteCategories
@@ -333,11 +334,68 @@ const CATEGORY_CHOICES = [
     { value: "other", label: "Organic / Other" }
 ];
 
-// The backend runs on the same laptop as this website, on port 8000.
-// Set window.ECOTRACK_API_BASE = "http://..." before this script to override.
+// Where the backend is. Order of preference:
+// 1) window.ECOTRACK_API_BASE  2) ?api=http://IP:8000 in the page address (remembered)
+// 3) the address saved on the Pickup & Delivery page  4) this page's own host, port 8000
+const ECOTRACK_API_KEY = "ecotrackApiBase";
+
+function normalizeApiBase(value) {
+
+    let text = String(value || "").trim().replace(/\/+$/, "");
+
+    if (!text) return "";
+
+    if (!/^https?:\/\//i.test(text)) text = "http://" + text;
+
+    return text;
+
+}
+
+function setApiBase(value) {
+
+    try {
+
+        const clean = normalizeApiBase(value);
+
+        if (clean) {
+            localStorage.setItem(ECOTRACK_API_KEY, clean);
+        } else {
+            localStorage.removeItem(ECOTRACK_API_KEY);
+        }
+
+    } catch (error) {
+        console.warn("Could not save the server address.", error);
+    }
+
+}
+
+function clearApiBase() {
+
+    try {
+        localStorage.removeItem(ECOTRACK_API_KEY);
+    } catch (error) {
+        console.warn("Could not clear the server address.", error);
+    }
+
+}
+
 function getApiBase() {
 
     if (window.ECOTRACK_API_BASE) return window.ECOTRACK_API_BASE;
+
+    try {
+
+        const fromUrl = new URLSearchParams(window.location.search).get("api");
+
+        if (fromUrl) setApiBase(fromUrl);
+
+        const saved = localStorage.getItem(ECOTRACK_API_KEY);
+
+        if (saved) return saved;
+
+    } catch (error) {
+        console.warn("Could not read the saved server address.", error);
+    }
 
     const host = window.location.hostname || "127.0.0.1";
 
@@ -449,7 +507,8 @@ async function sendScan(quantity, category) {
 
         throw new Error(
             "Cannot reach the server at " + base +
-            ". Check that the backend is running and this device is on the same Wi-Fi."
+            ". Check that the backend is running and this device is on the same Wi-Fi. " +
+            "If the backend is on another laptop, set its address on the Pickup & Delivery page."
         );
 
     } finally {
@@ -728,7 +787,7 @@ function showScanResult(data, quantity) {
             </div>
 
             <div class="reward-result">
-                🏆 You Earned ${points} Eco Points!
+                🏆 You Earned ${points} Recovery Points!
             </div>
 
             ${batchHtml}
@@ -736,14 +795,18 @@ function showScanResult(data, quantity) {
             ${eNote}
 
             <div class="demo-note">
-                Points are demo values, not money.
+                Points are demo values, not money. Saved on the server as demo collector #1 (Asha).
             </div>
 
         </div>
 
     `;
 
-    saveHistory(waste, quantity, points);
+    const choice = CATEGORY_CHOICES.find(function (item) {
+        return item.value === data.category;
+    });
+
+    saveHistory(waste, quantity, points, choice ? choice.label : waste.name);
 
     addEcoPoints(points);
 
@@ -755,13 +818,14 @@ function showScanResult(data, quantity) {
 // SAVE HISTORY
 // ========================================
 
-function saveHistory(waste, quantity, points) {
+function saveHistory(waste, quantity, points, label) {
 
     const history = getHistory();
 
     const newRecord = {
 
         category: waste.name,
+        label: label || waste.name,
         icon: waste.icon,
         bin: waste.bin,
         quantity: quantity,
@@ -885,15 +949,15 @@ function displayHistory() {
             <div class="history-item">
 
                 <div>
-                    <span>${item.icon || "♻️"}</span>
-                    <strong>${item.category}</strong>
-                    <small>Quantity: ${item.quantity || 1}</small>
+                    <span>${escapeHtml(item.icon || "♻️")}</span>
+                    <strong>${escapeHtml(item.label || item.category)}</strong>
+                    <small>Quantity: ${Number(item.quantity) || 1}</small>
                 </div>
 
                 <div>
-                    <strong>+${item.points || 0} Points</strong>
-                    <small>${item.date || ""}</small>
-                    <small>${item.time || ""}</small>
+                    <strong>+${Number(item.points) || 0} Points</strong>
+                    <small>${escapeHtml(item.date || "")}</small>
+                    <small>${escapeHtml(item.time || "")}</small>
                 </div>
 
             </div>
@@ -911,7 +975,7 @@ function displayHistory() {
 function clearHistory() {
 
     const confirmed = confirm(
-        "Are you sure you want to clear all history and Eco Points?"
+        "Are you sure you want to clear all history and Recovery Points?"
     );
 
     if (!confirmed) return;
@@ -926,7 +990,7 @@ function clearHistory() {
         result.innerHTML = "";
     }
 
-    alert("History and Eco Points cleared!");
+    alert("History and Recovery Points cleared!");
 
 }
 
@@ -1171,6 +1235,58 @@ function initializeCamera() {
 }
 
 // ========================================
+// SERVER TOTALS (dashboard)
+// ========================================
+
+async function updateServerSummary() {
+
+    const box = document.getElementById("serverSummaryText");
+
+    if (!box) return;
+
+    try {
+
+        const response = await fetch(
+            getApiBase() + "/batches?owner_id=" + ECOTRACK_OWNER_ID
+        );
+
+        if (!response.ok) throw new Error("Server error (" + response.status + ")");
+
+        const batches = await response.json();
+
+        const counts = {};
+
+        let points = 0;
+
+        batches.forEach(function (batch) {
+
+            counts[batch.status] = (counts[batch.status] || 0) + 1;
+
+            points += Number(batch.total_points) || 0;
+
+        });
+
+        const parts = [
+            "collecting", "ready", "assigned", "picked_up", "delivered", "completed"
+        ].map(function (status) {
+            return status.replace("_", " ") + ": " + (counts[status] || 0);
+        });
+
+        box.innerHTML =
+            "<strong>" + batches.length + "</strong> " + (batches.length === 1 ? "batch" : "batches") + " · <strong>" +
+            points + "</strong> Recovery Points in batches<br>" +
+            escapeHtml(parts.join(" · "));
+
+    } catch (error) {
+
+        box.textContent =
+            "Server not reachable (" + getApiBase() + "). The totals below still work on this device.";
+
+    }
+
+}
+
+// ========================================
 // MAKE FUNCTIONS AVAILABLE TO HTML
 // ========================================
 
@@ -1191,6 +1307,8 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeCamera();
 
     updateDashboard();
+
+    updateServerSummary();
 
     console.log("ecotrack Loaded Successfully!");
 
